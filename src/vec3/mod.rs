@@ -1,4 +1,7 @@
-use std::ops;
+use std::{
+    fmt::{Display, Formatter},
+    ops,
+};
 
 #[derive(Clone, Copy)]
 pub struct Vec3(f64, f64, f64);
@@ -6,11 +9,7 @@ pub struct Vec3(f64, f64, f64);
 pub type Point3 = Vec3;
 
 impl Vec3 {
-    pub fn init() -> Self {
-        Vec3(0.0, 0.0, 0.0)
-    }
-
-    pub fn init_val(e0: f64, e1: f64, e2: f64) -> Self {
+    pub fn new(e0: f64, e1: f64, e2: f64) -> Self {
         Vec3(e0, e1, e2)
     }
 
@@ -52,11 +51,17 @@ impl Vec3 {
     }
 }
 
+impl Display for Vec3 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {} {}", self.x(), self.y(), self.z())
+    }
+}
+
 impl ops::Neg for Vec3 {
     type Output = Vec3;
 
     fn neg(self) -> Self::Output {
-        Vec3::init_val(-self.0, -self.1, -self.2)
+        Vec3::new(-self.0, -self.1, -self.2)
     }
 }
 
@@ -126,7 +131,7 @@ impl ops::Div<f64> for Vec3 {
 
 #[test]
 fn smoke() {
-    let point = Point3::init();
+    let point = Point3::new(0.0, 0.0, 0.0);
     let a = 2.0 * point;
     let a = a * 2.0;
     let a = a / 1.0;
