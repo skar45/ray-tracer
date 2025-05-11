@@ -17,7 +17,7 @@ use objects::hittable_list::HittableList;
 use objects::sphere::Sphere;
 use std::fs::{self, File};
 use std::path::Path;
-use vec3::Point3;
+use vec3::{Point3, Vec3};
 
 const DEBUG_FILE: &'static str = "debug.log";
 
@@ -69,11 +69,26 @@ fn main() {
     let image_width = 400;
     let samples_per_pixel = 100;
     let recursion_depth = 50;
+
+    let vfov = 20.0;
+    let look_from = Point3::new(-2.0, 2.0, 1.0);
+    let look_at = Point3::new(0.0, 0.0, -1.0);
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+
+    let focus_dist = 3.4;
+    let defocus_angle = 10.0;
+
     let camera = Camera::new(
         aspect_ratio,
         image_width,
         samples_per_pixel,
         recursion_depth,
+        vfov,
+        look_from,
+        look_at,
+        vup,
+        focus_dist,
+        defocus_angle
     );
     camera.render(&world);
 }
