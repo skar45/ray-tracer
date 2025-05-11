@@ -33,50 +33,82 @@ fn main() {
         .init();
 
     let mut world = HittableList::new();
-    let material_ground = MaterialType::lambertian(Color::new(0.8, 0.8, 0.0));
-    let material_center = MaterialType::lambertian(Color::new(0.1, 0.2, 0.5));
-    let material_left = MaterialType::dielectric(1.50);
-    let material_bubble = MaterialType::dielectric(1.0 / 1.50);
-    let material_right = MaterialType::metal(Color::new(0.8, 0.6, 0.2), 1.0);
 
+    let material_ground = MaterialType::lambertian(Color::new(0.6, 0.6, 0.0));
     world.add_obj(Sphere::new(
-        Point3::new(0.0, -100.5, -1.0),
-        100.0,
+        Point3::new(0.0, -1000.0, 1000.0),
+        1000.0,
         material_ground,
     ));
+
+    let material1 = MaterialType::dielectric(1.5);
     world.add_obj(Sphere::new(
-        Point3::new(0.0, 0.0, -1.2),
-        0.5,
-        material_center,
+        Point3::new(0.0, 1.0, 0.0),
+        1.0,
+        material1,
     ));
+
+    let material2 = MaterialType::lambertian(Color::new(0.4, 0.2, 0.1));
     world.add_obj(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
-        0.5,
-        material_left,
+        Point3::new(-4.0, 1.0, -1.0),
+        1.0,
+        material2,
     ));
+
+    let material3 = MaterialType::metal(Color::new(0.7, 0.6, 0.5), 0.3);
     world.add_obj(Sphere::new(
-        Point3::new(-1.0, 0.0, -1.0),
-        0.4,
-        material_bubble,
+        Point3::new(4.0, 1.0, 0.0),
+        1.0,
+        material3,
     ));
+
+    let material4 = MaterialType::dielectric(1.5);
     world.add_obj(Sphere::new(
         Point3::new(1.0, 0.0, -1.0),
+        0.6,
+        material4,
+    ));
+
+    let material5 = MaterialType::metal(Color::new(0.1, 0.2, 0.9), 0.5);
+    world.add_obj(Sphere::new(
+        Point3::new(-4.0, -1.0, 2.0),
         0.5,
-        material_right,
+        material5,
+    ));
+
+    let material6 = MaterialType::lambertian(Color::random());
+    world.add_obj(Sphere::new(
+        Point3::new(4.0, 4.0, -6.0),
+        0.5,
+        material6,
+    ));
+
+    let material7 = MaterialType::lambertian(Color::random());
+    world.add_obj(Sphere::new(
+        Point3::new(1.0, -2.0, -2.0),
+        0.4,
+        material7,
+    ));
+
+    let material8 = MaterialType::dielectric(0.5);
+    world.add_obj(Sphere::new(
+        Point3::new(6.0, 7.0, 8.0),
+        0.3,
+        material8,
     ));
 
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400;
-    let samples_per_pixel = 100;
+    let image_width = 1200;
+    let samples_per_pixel = 500;
     let recursion_depth = 50;
 
     let vfov = 20.0;
-    let look_from = Point3::new(-2.0, 2.0, 1.0);
+    let look_from = Point3::new(1.0, 2.0, 1.0);
     let look_at = Point3::new(0.0, 0.0, -1.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
 
-    let focus_dist = 3.4;
-    let defocus_angle = 10.0;
+    let focus_dist = 10.0;
+    let defocus_angle = 0.6;
 
     let camera = Camera::new(
         aspect_ratio,
