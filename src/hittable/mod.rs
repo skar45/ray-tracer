@@ -1,5 +1,7 @@
 use crate::{
+    color::Color,
     interval::Interval,
+    material::MaterialType,
     ray::Ray,
     vec3::{Point3, Vec3},
 };
@@ -11,6 +13,7 @@ pub struct HitRecord {
     pub t: f64,
     pub front_face: bool,
     pub is_hit: bool,
+    pub mat: MaterialType,
 }
 
 impl HitRecord {
@@ -29,12 +32,14 @@ impl Default for HitRecord {
     fn default() -> Self {
         let p = Point3::new(0.0, 0.0, 0.0);
         let normal = Point3::new(0.0, 0.0, 0.0);
+        let mat = MaterialType::lambertian(Color::default());
         HitRecord {
             p,
             normal,
             t: 0.0,
             front_face: false,
             is_hit: false,
+            mat,
         }
     }
 }

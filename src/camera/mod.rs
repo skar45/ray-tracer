@@ -3,12 +3,7 @@ use std::io::{self, Write};
 use log::info;
 
 use crate::{
-    color::{write_color, Color},
-    hittable::{HitRecord, Hittable},
-    interval::Interval,
-    ray::Ray,
-    utils::{random_f64, INFINITY},
-    vec3::{Point3, Vec3},
+    color::{write_color, Color}, hittable::{HitRecord, Hittable}, interval::Interval, material::Material, ray::Ray, utils::{random_f64, INFINITY}, vec3::{Point3, Vec3}
 };
 
 pub struct Camera {
@@ -20,11 +15,17 @@ pub struct Camera {
     pixel_delta_u: Vec3,
     pixel_delta_v: Vec3,
     samples_per_pixel: i32,
-    pixels_samples_scale: f64
+    pixels_samples_scale: f64,
+    recursion_depth: usize,
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: i32, samples_per_pixel: i32) -> Self {
+    pub fn new(
+        aspect_ratio: f64,
+        image_width: i32,
+        samples_per_pixel: i32,
+        recursion_depth: usize,
+    ) -> Self {
         let image_height = (image_width as f64 / aspect_ratio) as i32;
         let image_height = if image_height < 1 { 1 } else { image_height };
 
@@ -58,17 +59,29 @@ impl Camera {
             pixel_delta_u,
             pixel_delta_v,
             samples_per_pixel,
-            pixels_samples_scale
+            pixels_samples_scale,
+            recursion_depth,
         }
     }
 
-    fn ray_color<T: Hittable>(r: &Ray, world: &T) -> Color {
+    fn ray_color<T: Hittable>(r: &Ray, world: &T, depth: usize) -> Color {
+        // Limiting ray bounces
+        if depth == 0 {
+            return Color::new(0.0, 0.0, 0.0);
+        };
+
         let mut rec = HitRecord::default();
-        let interval = Interval::new(0.0, INFINITY);
+        // 0.001 prevents shadow acne
+        let interval = Interval::new(0.001, INFINITY);
         let rec = world.hit(r, &interval, &mut rec);
         if rec.is_hit {
-            return 0.5 * (rec.normal + Color::new(1.0, 1.0, 1.0));
+            let scatter =  rec.mat.scatter(r, rec);
+            if scatter.is_scattered {
+                return scatter.attenuation * Camera::ray_color(&scatter.ray, world, depth - 1);
+            }
+            return Color::new(0.0, 0.0, 0.0);
         }
+
         let unit_direction = Color::unit_vector(r.dir());
         let a = 0.5 * (unit_direction.y() + 1.0);
         (1.0 - a) * Color::new(1.0, 1.0, 1.0) + a * Color::new(0.5, 0.7, 1.0)
@@ -80,7 +93,7 @@ impl Camera {
 
     fn get_ray(&self, i: i32, j: i32) -> Ray {
         let offset = Camera::sample_square();
-        let pixel_sample = self.pixel_00 
+        let pixel_sample = self.pixel_00
             + ((i as f64 + offset.x()) * self.pixel_delta_u)
             + ((j as f64 + offset.y()) * self.pixel_delta_v);
         let ray_direction = pixel_sample - self.camera_center;
@@ -95,11 +108,10 @@ impl Camera {
         for j in 0..self.image_height {
             info!("Scan lines remaining: {} ", self.image_height - j);
             for i in 0..self.image_width {
-                let mut pixel_colour =  Color::new(0.0, 0.0, 0.0);
+                let mut pixel_colour = Color::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
                     let ray = self.get_ray(i, j);
-                    pixel_colour += Camera::ray_color(&ray, world);
-
+                    pixel_colour += Camera::ray_color(&ray, world, self.recursion_depth);
                 }
                 write_color(&mut stdout, &(self.pixels_samples_scale * pixel_colour));
             }

@@ -3,6 +3,8 @@ use std::{
     ops,
 };
 
+use crate::utils::{random_f64, random_min_max};
+
 #[derive(Clone, Copy)]
 pub struct Vec3(f64, f64, f64);
 
@@ -34,6 +36,11 @@ impl Vec3 {
         f64::sqrt(self.length_squared())
     }
 
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        (f64::abs(self.0) < s) && (f64::abs(self.1) < s) && (f64::abs(self.2) < s)
+    }
+
     pub fn dot(u: &Vec3, v: &Vec3) -> f64 {
         u.0 * v.0 + u.1 * v.1 + u.2 * v.2
     }
@@ -48,6 +55,49 @@ impl Vec3 {
 
     pub fn unit_vector(v: &Vec3) -> Vec3 {
         *v / v.length()
+    }
+
+    pub fn random_unit_vector() -> Vec3 {
+        loop {
+            let p = Vec3::random_min_max(-1.0, 1.0);
+            let lensq = p.length_squared();
+            // Deal with underflow when squaring small coordinates
+            if 1e-160 < lensq && lensq <= 1.0 {
+                return p / f64::sqrt(lensq);
+            }
+        }
+    }
+
+    pub fn random_on_hemisphere(normal: &Vec3) -> Vec3 {
+        let on_unit = Vec3::random_unit_vector();
+        // Check if in the same hemisphere as the normal
+        if Vec3::dot(&on_unit, normal) > 0.0 {
+            on_unit
+        } else {
+            -on_unit
+        }
+    }
+
+    pub fn reflect(v: Vec3, n: Vec3) -> Vec3 {
+        v - 2.0 * Vec3::dot(&v, &n) * n
+    }
+
+    pub fn random() -> Vec3 {
+        Vec3(random_f64(), random_f64(), random_f64())
+    }
+
+    pub fn random_min_max(min: f64, max: f64) -> Vec3 {
+        Vec3(
+            random_min_max(min, max),
+            random_min_max(min, max),
+            random_min_max(min, max),
+        )
+    }
+}
+
+impl Default for Vec3 {
+    fn default() -> Self {
+        Vec3(0.0, 0.0, 0.0)
     }
 }
 
