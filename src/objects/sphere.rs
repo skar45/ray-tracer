@@ -1,11 +1,15 @@
 use crate::{
-    hittable::{HitRecord, Hittable}, interval::Interval, material::MaterialType, ray::Ray, vec3::Point3
+    hittable::{HitRecord, Hittable},
+    interval::Interval,
+    material::MaterialType,
+    ray::Ray,
+    vec3::Point3,
 };
 
 pub struct Sphere {
     center: Point3,
     radius: f64,
-    mat: MaterialType
+    mat: MaterialType,
 }
 
 impl Sphere {

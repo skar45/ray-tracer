@@ -1,8 +1,10 @@
+use dielectric::Dielectric;
 use lambertian::Lambertian;
 use metal::Metal;
 
 use crate::{color::Color, hittable::HitRecord, ray::Ray};
 
+pub mod dielectric;
 pub mod lambertian;
 pub mod metal;
 
@@ -20,11 +22,19 @@ pub trait Material {
 pub enum MaterialType {
     Lambertian(Lambertian),
     Metal(Metal),
+    Dielectric(Dielectric),
 }
 
 impl MaterialType {
-    pub fn lambertian(albedo: Color) -> Self { MaterialType::Lambertian(Lambertian::new(albedo)) }
-    pub fn metal(albedo: Color) -> Self { MaterialType::Metal(Metal::new(albedo)) }
+    pub fn lambertian(albedo: Color) -> Self {
+        MaterialType::Lambertian(Lambertian::new(albedo))
+    }
+    pub fn metal(albedo: Color, fuzz: f64) -> Self {
+        MaterialType::Metal(Metal::new(albedo, fuzz))
+    }
+    pub fn dielectric(refraction_index: f64) -> Self {
+        MaterialType::Dielectric(Dielectric::new(refraction_index))
+    }
 }
 
 impl Material for MaterialType {
@@ -32,6 +42,7 @@ impl Material for MaterialType {
         match &self {
             MaterialType::Metal(m) => m.scatter(r_in, rec),
             MaterialType::Lambertian(l) => l.scatter(r_in, rec),
+            MaterialType::Dielectric(d) => d.scatter(r_in, rec),
         }
     }
 }

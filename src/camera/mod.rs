@@ -3,7 +3,13 @@ use std::io::{self, Write};
 use log::info;
 
 use crate::{
-    color::{write_color, Color}, hittable::{HitRecord, Hittable}, interval::Interval, material::Material, ray::Ray, utils::{random_f64, INFINITY}, vec3::{Point3, Vec3}
+    color::{write_color, Color},
+    hittable::{HitRecord, Hittable},
+    interval::Interval,
+    material::Material,
+    ray::Ray,
+    utils::{random_f64, INFINITY},
+    vec3::{Point3, Vec3},
 };
 
 pub struct Camera {
@@ -75,7 +81,7 @@ impl Camera {
         let interval = Interval::new(0.001, INFINITY);
         let rec = world.hit(r, &interval, &mut rec);
         if rec.is_hit {
-            let scatter =  rec.mat.scatter(r, rec);
+            let scatter = rec.mat.scatter(r, rec);
             if scatter.is_scattered {
                 return scatter.attenuation * Camera::ray_color(&scatter.ray, world, depth - 1);
             }
